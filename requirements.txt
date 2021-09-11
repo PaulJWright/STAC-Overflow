@@ -4,24 +4,39 @@
 black==20.8b1
 
 # external requirements
+albumentations>=1.0.3
 click==8.0.1
 coverage==5.5
 flake8>=3.9.0, <4.0
-ipython==7.0.1
+ipython==7.27.0
 jupyter_client>=5.1, <7.0
 jupyterlab==0.31.1
 jupyter~=1.0
+matplotlib==3.4.3
 nb-black==1.0.7
 pandas==1.2.4
+pandas_path==0.3.0
 plotly==4.14.3
 pre-commit==2.10.1
 pytest-cov~=2.5
 pytest-mock>=1.7.1, <2.0
 pytest~=6.1.2
 python-dotenv>=0.5.1
+rasterio==1.2.8
+segmentation_models_pytorch==0.2.0
 scikit-learn==0.24.2
 scipy==1.6.2
 tables==3.6.1
-torch==1.8.1
-tqdm==4.56.0
+
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch==1.9.0+cu111
+pytorch_lightning==1.4.5
+
+# Prefer to use the LTS 1.8.2; lightning uninstalls 1.8.2 and installs
+# 1.9.0+cu102 which won't work on the RTX 3090!
+#
+# --find-links https://download.pytorch.org/whl/lts/1.8/torch_lts.html
+# torch==1.8.2+cu111
+# torchvision==0.9.2+cu111
+# torchaudio==0.8.2
 wheel>=0.32.2
