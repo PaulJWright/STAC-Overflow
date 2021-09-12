@@ -1,0 +1,42 @@
+batchSize: 8 ## Input batch size
+workers: 4 ## Number of data loading workers
+nepoch: 10000 ## Number of epochs
+outf: "test_10k_UNetPP_resnet34_3/" ## Output folder
+logfile: "logfile.txt" ## Logfile name
+manualSeed: 0 ## Manually set random seed.  If 0, random number will be chosen from 1 -> 10000
+save_freq: 10 ## Epoch frequency with which to save model
+torch_deterministic: False ## If true, will force torch to use deterministic algorithms for reproducibility
+
+### Dataset
+#dataset: "/data/5x5-ai-rd-S3/external-data/modelnet40_normal_resampled"
+dataset: "~/Documents/drivendata/stac-overflow/data/processed/v2_12Sept/" ## Dataset path
+#split_name: "/data/5x5-ai-rd-S3/external-data/modelnet40_normal_resampled" ## Split filename root
+split_name: "~/Documents/drivendata/stac-overflow/data/processed/v2_12Sept/"
+#dataset_type: modelnet40
+dataset_type: "FloodDataset" ## Dataset type: shapenet, modelnet40, towernet
+augmentation: True
+
+### Optimizer
+optimizer: adam ## Optimizer to use.  Right now only adam is implemented
+lr: 0.00005 ## Learning rate
+beta1: 0.9
+beta2: 0.999
+
+### Learning rate scheduler
+step_size: 50
+gamma: 0.5
+
+### Feature transform
+# feature_transform: True ## Use feature transform
+# ft_regularization: 0.001
+
+### Model to use
+model: "UNetPP" # "PretrainedUNet"
+PretrainedUNet_backbone: "resnet34"
+PretrainedUNet_weights: "imagenet"
+# PretrainedUNet_aux: dict(
+#   pooling="max",  # one of 'avg', 'max'
+#   dropout=0.9,  # dropout ratio, default is None
+#   activation="sigmoid",  # activation function, default is None
+#   classes=2,  # define number of output labels
+# )

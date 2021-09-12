@@ -152,7 +152,7 @@ class Options:
         self.parser.add_argument(
             "--split_name",
             type=str,
-            default="/data/scratch/mackenzie/handoff/towernet_handoff_",
+            default="~/Documents/drivendata/stac-overflow/data/processed/v1_12Sept/",
             help="""
             Split name.
             [Default: '%(default)s']
@@ -162,7 +162,7 @@ class Options:
         self.parser.add_argument(
             "--dataset",
             type=str,
-            default="/data/5x5-ai-rd-S3/internal-data/point-cloud/towers/cropped_boxes_pc",
+            default="~/Documents/drivendata/stac-overflow/data/processed/v1_12Sept/",
             help="""
             Dataset path.
             [Default: '%(default)s']

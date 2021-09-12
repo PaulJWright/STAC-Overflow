@@ -52,9 +52,9 @@ class FloodDataset(torch.utils.data.Dataset):
 
         self.fns = []
         if self.split == "train":
-            data = pd.read_csv(f"{self.split_name}floodId_train.csv")
+            data = pd.read_csv(f"{self.split_name}chipId_train.csv")
         elif self.split == "val":
-            data = pd.read_csv(f"{self.split_name}floodId_val.csv")
+            data = pd.read_csv(f"{self.split_name}chipId_val.csv")
         else:
             print("Not a valid split type")
 
@@ -65,6 +65,9 @@ class FloodDataset(torch.utils.data.Dataset):
             .drop_duplicates()
             .reset_index(drop=True)
         )
+
+        if self.data_y is not None:
+            assert self.data_x.shape[0] == self.data_y.shape[0]
 
     def __getitem__(self, idx):
         # Loads a 2-channel image from a chip-level dataframe
