@@ -44,7 +44,7 @@ class XEDiceLoss(torch.nn.Module):
             torch.sum(pred + true) + 1e-7
         )
 
-        return (0.95 * xe_loss) + (0.05 * dice_loss)
+        return (0.5 * xe_loss) + (0.5 * dice_loss)
 
 
 def intersection_and_union(pred, true):
@@ -126,16 +126,19 @@ if opt["dataset_type"] == "FloodDataset":
     # https://github.com/albumentations-team/albumentations#pixel-level-transforms
     training_transformations = albumentations.Compose(
         [
-            albumentations.RandomCrop(64, 64),
-            # albumentations.RandomRotate90(),
+            albumentations.RandomCrop(256, 256),
+            albumentations.RandomRotate90(),
             albumentations.HorizontalFlip(),
             albumentations.VerticalFlip(),
-            albumentations.Rotate(),
-            albumentations.Transpose(),
-            albumentations.ShiftScaleRotate(),
-            albumentations.Affine(),
-            albumentations.Perspective(),
-            albumentations.Downscale(),
+            # albumentations.RandomRotate90(),
+            # albumentations.HorizontalFlip(),
+            # albumentations.VerticalFlip(),
+            # albumentations.Rotate(),
+            # albumentations.Transpose(),
+            # albumentations.ShiftScaleRotate(),
+            # albumentations.Affine(),
+            # albumentations.Perspective(),
+            # albumentations.Downscale(),
         ]
     )
 
@@ -256,9 +259,14 @@ if opt["optimizer"] == "adam":
 else:
     sys.exit("This optimizer is not implemented:", opt["optimizer"])
 
-# --- Learning rate scheduler
-scheduler = optim.lr_scheduler.StepLR(
-    optimizer, step_size=opt["step_size"], gamma=opt["gamma"]
+# # --- Learning rate scheduler
+# scheduler = optim.lr_scheduler.StepLR(
+#     optimizer, step_size=opt["step_size"], gamma=opt["gamma"]
+# )
+
+# Used in original code.
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    optimizer, mode="max", factor=0.5, patience=opt["patience"], verbose=True
 )
 
 # --- Load model onto appropriate device
@@ -406,10 +414,11 @@ for epoch in range(opt["nepoch"]):
         #        "%s/cls_model_%d.pth" % (opt["outf"], epoch),
         #    )
         # else:
-        torch.save(
-            classifier.state_dict(),
-            "%s/cls_model_%d.pth" % (opt["outf"], epoch),
-        )
+        pass
+        # torch.save(
+        #     classifier.state_dict(),
+        #     "%s/cls_model_%d.pth" % (opt["outf"], epoch),
+        # )
 
     # --- Write mean loss/acc for epoch to file
     # Defining what data to write to the "loss" file
@@ -425,9 +434,14 @@ for epoch in range(opt["nepoch"]):
     with open(os.path.join(opt["outf"], "losses.txt"), "a") as loss_out:
         loss_out.write(loss_msg)
     #
+
     # --- Update learning rate
-    scheduler.step()
-    print(scheduler.get_last_lr())
+    #
+    # scheduler.step()
+    # print(scheduler.get_last_lr())
+
+    scheduler.step(val_iou)
+    # print(scheduler.get_lr())
 log_fout.close()
 
 # Write final model
