@@ -1,7 +1,7 @@
 batchSize: 8 ## Input batch size
 workers: 4 ## Number of data loading workers
 nepoch: 5000 ## Number of epochs
-outf: "test_resnet34_5e-5_chip/" ## Output folder
+outf: "test_resnet34_5e-5_flood_hbe_patience4/" ## Output folder
 logfile: "logfile.txt" ## Logfile name
 manualSeed: 0 ## Manually set random seed.  If 0, random number will be chosen from 1 -> 10000
 save_freq: 10 ## Epoch frequency with which to save model
@@ -9,9 +9,9 @@ torch_deterministic: False ## If true, will force torch to use deterministic alg
 
 ### Dataset
 #dataset: "/data/5x5-ai-rd-S3/external-data/modelnet40_normal_resampled"
-dataset: "~/Documents/drivendata/stac-overflow/data/processed/v2_12Sept/" ## Dataset path
+dataset: "~/Documents/drivendata/stac-overflow/data/processed/v3_13Sept/" ## Dataset path
 #split_name: "/data/5x5-ai-rd-S3/external-data/modelnet40_normal_resampled" ## Split filename root
-split_name: "~/Documents/drivendata/stac-overflow/data/processed/v2_12Sept/"
+split_name: "~/Documents/drivendata/stac-overflow/data/processed/v3_13Sept/"
 #dataset_type: modelnet40
 dataset_type: "FloodDataset" ## Dataset type: shapenet, modelnet40, towernet
 augmentation: True
@@ -30,6 +30,10 @@ patience: 4
 ### Feature transform
 # feature_transform: True ## Use feature transform
 # ft_regularization: 0.001
+
+### Augmentations
+crop_size_square: 256
+albumnttns_value: 15 # currently 0 < x <= 15; as 0000 < x <= 1111
 
 ### Model to use
 model: "PretrainedUNet"

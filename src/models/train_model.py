@@ -124,23 +124,52 @@ shutil.copyfile(
 if opt["dataset_type"] == "FloodDataset":
 
     # https://github.com/albumentations-team/albumentations#pixel-level-transforms
-    training_transformations = albumentations.Compose(
-        [
-            albumentations.RandomCrop(256, 256),
-            albumentations.RandomRotate90(),
-            albumentations.HorizontalFlip(),
-            albumentations.VerticalFlip(),
-            # albumentations.RandomRotate90(),
-            # albumentations.HorizontalFlip(),
-            # albumentations.VerticalFlip(),
-            # albumentations.Rotate(),
-            # albumentations.Transpose(),
-            # albumentations.ShiftScaleRotate(),
-            # albumentations.Affine(),
-            # albumentations.Perspective(),
-            # albumentations.Downscale(),
-        ]
+
+    transformations = [
+        albumentations.RandomCrop(
+            opt["crop_size_square"], opt["crop_size_square"]
+        ),
+        albumentations.RandomRotate90(),
+        albumentations.HorizontalFlip(),
+        albumentations.VerticalFlip(),
+        # albumentations.RandomRotate90(),
+        # albumentations.HorizontalFlip(),
+        # albumentations.VerticalFlip(),
+        # albumentations.Rotate(),
+        # albumentations.Transpose(),
+        # albumentations.ShiftScaleRotate(),
+        # albumentations.Affine(),
+        # albumentations.Perspective(),
+        # albumentations.Downscale(),
+    ]
+
+    # Converting integer opt["albumnttns_value"] into a binary of the same length
+    # as the transformations array and then indexes of the array.
+    #
+    # e.g. 6 -> 0110 -> [1,2] -> [  albumentations.RandomRotate90(),
+    #                               albumentations.HorizontalFlip(),
+    #                            ]
+    #
+    transformation = bin(opt["albumnttns_value"])[2:].zfill(
+        len(transformations)
     )
+    assert len(transformation) == len(transformations)
+    transformation_yes_no = [
+        int(i)
+        for i in range(0, len(transformation))
+        if transformation[i] == "1"
+    ]
+    print("int: ", opt["albumnttns_value"], "| binary:", transformation)
+
+    transformations = [transformations[i] for i in transformation_yes_no]
+    training_transformations = albumentations.Compose(transformations)
+    #
+    # print
+    print(training_transformations)
+
+    # --- Write augmentation parameters to logfile
+    log_fout.write(">>> Augmentations:")
+    log_fout.write(str(training_transformations) + "\n")
 
     # --- Load modelnet training set
     dataset = FloodDataset(
