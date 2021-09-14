@@ -39,3 +39,4 @@ jobs:
           name: code_check_and_linting
           # This assumes pytest is installed via the install-package step above
           command: pre-commit run -a --hook-stage manual
+
