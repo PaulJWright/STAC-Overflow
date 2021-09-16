@@ -8,6 +8,7 @@ albumentations>=1.0.3
 click==8.0.1
 coverage==5.5
 flake8>=3.9.0, <4.0
+git+https://github.com/ufoym/imbalanced-dataset-sampler.git # torchsampler-0.1.1
 ipython==7.27.0
 jupyter_client>=5.1, <7.0
 jupyterlab==0.31.1
@@ -31,6 +32,7 @@ tables==3.6.1
 --find-links https://download.pytorch.org/whl/torch_stable.html
 torch==1.9.0+cu111
 pytorch_lightning==1.4.5
+
 
 # Prefer to use the LTS 1.8.2; lightning uninstalls 1.8.2 and installs
 # 1.9.0+cu102 which won't work on the RTX 3090!
