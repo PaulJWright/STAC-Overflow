@@ -1,16 +1,16 @@
-batchSize: 12 ## Input batch size
+batchSize: 4 ## Input batch size
 workers: 4 ## Number of data loading workers
 nepoch: 90 ## Number of epochs
-outf: "test_resnet50_5e-5_all_data_chip_dropout_adam_newdataprocessing_balanced_test/" ## Output folder
+outf: "test_resnet50_5e-5_all_data_chip_dropout_adam_newdataprocessing_balancedsampler_fivesets_0/" ## Output folder
 logfile: "logfile.txt" ## Logfile name
 manualSeed: 0 ## Manually set random seed.  If 0, random number will be chosen from 1 -> 10000
 save_freq: 10 ## Epoch frequency with which to save model
 torch_deterministic: False ## If true, will force torch to use deterministic algorithms for reproducibility
 
 ### Dataset
-dataset: "~/Documents/drivendata/stac-overflow/data/processed/v4_14Sept/" ## Dataset path
+dataset: "~/Documents/drivendata/stac-overflow/data/processed/five_sets/" ## Dataset path
 #split_name: "/data/5x5-ai-rd-S3/external-data/modelnet40_normal_resampled" ## Split filename root
-split_name: "~/Documents/drivendata/stac-overflow/data/processed/v4_14Sept/"
+split_name: "~/Documents/drivendata/stac-overflow/data/processed/five_sets/"
 #split_name: "~/Documents/drivendata/stac-overflow/data/processed/five_sets/"
 dataset_type: "FloodDataset" ## Dataset type: shapenet, modelnet40, towernet
 augmentation: True
@@ -28,7 +28,7 @@ sgd_momentum: 0.9
 ### Learning rate scheduler
 # step_size: 100
 gamma: 0.5
-patience: 5
+patience: 8
 
 ### Loss function
 xentropy: 0.5

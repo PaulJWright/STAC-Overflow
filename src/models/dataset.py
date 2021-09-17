@@ -6,6 +6,22 @@ import torch
 new = 1
 
 
+def normalize(array, min_val=None, max_val=None):
+
+    if not min_val:
+        min_val = np.nanmin(array)
+
+    if not max_val:
+        max_val = np.nanmax(array)
+
+    if min_val == max_val:
+        min_val, max_val = 0, 1
+
+    array = np.clip(array, min_val, max_val)
+    array = (array - min_val) / (max_val - min_val)
+    return np.nan_to_num(array)
+
+
 class FloodDataset(torch.utils.data.Dataset):
     """Reads in images, transforms pixel values, and serves a
     dictionary containing chip ids, image tensors, and
@@ -99,10 +115,10 @@ class FloodDataset(torch.utils.data.Dataset):
         self.fns = []
         if self.split == "train":
             data = pd.read_csv(
-                f"{self.split_name}chipId_train_weighted_withoutna.csv"
+                f"{self.split_name}chipId_0_train.csv"  # weighted_withoutna.csv"
             )
         elif self.split == "val":
-            data = pd.read_csv(f"{self.split_name}chipId_val.csv")
+            data = pd.read_csv(f"{self.split_name}chipId_1_val.csv")
         else:
             print("Not a valid split type")
 
@@ -126,21 +142,21 @@ class FloodDataset(torch.utils.data.Dataset):
                     [
                         "location",
                         "chip_id",
-                        "weight_0",
-                        "weight_1",
-                        "weight_2",
-                        "weight_3",
-                        "weight_4",
+                        # "weight_0",
+                        # "weight_1",
+                        # "weight_2",
+                        # "weight_3",
+                        # "weight_4",
                     ]
                 ]
                 .drop_duplicates(["chip_id"])
                 .reset_index(drop=True)
             )
 
-            self.weighting_labels["median_weight"] = self.weighting_labels[
-                ["weight_0", "weight_1", "weight_2", "weight_3", "weight_4"]
-            ].median(axis=1)
-            self.weightings = self.weighting_labels["median_weight"].to_numpy()
+            # self.weighting_labels["median_weight"] = self.weighting_labels[
+            #     ["weight_0", "weight_1", "weight_2", "weight_3", "weight_4"]
+            # ].median(axis=1)
+            # self.weightings = self.weighting_labels["median_weight"].to_numpy()
 
         if self.data_y is not None:
             assert self.data_x.shape[0] == self.data_y.shape[0]
@@ -160,43 +176,92 @@ class FloodDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         # Loads a 2-channel image from a chip-level dataframe
-        img = self.data_x.loc[idx]
 
-        with rasterio.open(img.vv_path) as vv:
-            vv_path = vv.read(1)
-        with rasterio.open(img.vh_path) as vh:
-            vh_path = vh.read(1)
-        # x_arr = np.stack([vv_path, vh_path], axis=-1)
-        with rasterio.open(img.nasadem_path) as nasadem:
-            nasadem_path = nasadem.read(1)
-        with rasterio.open(img.occurrence_path) as occurrence:
-            occurrence_path = occurrence.read(1)
-        with rasterio.open(img.seasonality_path) as seasonality:
-            seasonality_path = seasonality.read(1)
-        with rasterio.open(img.extent_path) as extent:
-            extent_path = extent.read(1)
-        with rasterio.open(img.change_path) as change:
-            change_path = change.read(1)
-        with rasterio.open(img.recurrence_path) as recurrence:
-            recurrence_path = recurrence.read(1)
-        with rasterio.open(img.transitions_path) as transitions:
-            transitions_path = transitions.read(1)
-        x_arr = np.stack(
-            [
-                vv_path,
-                vh_path,
-                occurrence_path,
-                nasadem_path,
-                seasonality_path,
-                extent_path,
-                change_path,
-                recurrence_path,
-                transitions_path,
-            ],
-            axis=-1,
-        )
+        if new == 2:
+            img = self.data_x.loc[idx]
 
-        if new == 1:
+            with rasterio.open(img.vv_path) as vv:
+                vv_path = vv.read(1)
+                # vv_path = np.clip(vv_path, np.nanmin(vv_path), np.nanmax(vv_path))
+                # vv_path = normalize(vv_path, -77, 26)
+
+            with rasterio.open(img.vh_path) as vh:
+                vh_path = vh.read(1)
+                # vh_path = np.clip(vh_path, np.nanmin(vh_path), np.nanmax(vh_path))
+                # vh_path = normalize(vh_path, -77, 26)
+
+            with rasterio.open(img.occurrence_path) as occurrence:
+                occurrence_img = normalize(occurrence.read(1)).astype(
+                    np.float32
+                )
+
+            with rasterio.open(img.seasonality_path) as seasonality:
+                seasonality_img = normalize(seasonality.read(1)).astype(
+                    np.float32
+                )
+
+            with rasterio.open(img.extent_path) as extent:
+                extent_img = normalize(extent.read(1)).astype(np.float32)
+
+            with rasterio.open(img.nasadem_path) as dem:
+                dem_img = (normalize(dem.read(1)) < 0.5).astype(np.float32)
+
+            o_s_e_combined = (
+                (
+                    0.25 * occurrence_img
+                    + 0.25 * seasonality_img
+                    + 0.5 * extent_img
+                )
+                > 0.5
+            ).astype(np.float32)
+
+            x_arr = np.stack(
+                [
+                    vv_path,
+                    vh_path,
+                    o_s_e_combined,
+                    dem_img,
+                ],
+                axis=-1,
+            )
+
+        elif new == 1:
+            img = self.data_x.loc[idx]
+
+            with rasterio.open(img.vv_path) as vv:
+                vv_path = vv.read(1)
+            with rasterio.open(img.vh_path) as vh:
+                vh_path = vh.read(1)
+            # x_arr = np.stack([vv_path, vh_path], axis=-1)
+            with rasterio.open(img.nasadem_path) as nasadem:
+                nasadem_path = nasadem.read(1)
+            with rasterio.open(img.occurrence_path) as occurrence:
+                occurrence_path = occurrence.read(1)
+            with rasterio.open(img.seasonality_path) as seasonality:
+                seasonality_path = seasonality.read(1)
+            with rasterio.open(img.extent_path) as extent:
+                extent_path = extent.read(1)
+            with rasterio.open(img.change_path) as change:
+                change_path = change.read(1)
+            with rasterio.open(img.recurrence_path) as recurrence:
+                recurrence_path = recurrence.read(1)
+            with rasterio.open(img.transitions_path) as transitions:
+                transitions_path = transitions.read(1)
+            x_arr = np.stack(
+                [
+                    vv_path,
+                    vh_path,
+                    occurrence_path,
+                    nasadem_path,
+                    seasonality_path,
+                    extent_path,
+                    change_path,
+                    recurrence_path,
+                    transitions_path,
+                ],
+                axis=-1,
+            )
+
             # Min-max normalization
             # !TODO understand if min/max_norm here is suitable.
             # !TODO missing values should go to zero (as easier to predict)
