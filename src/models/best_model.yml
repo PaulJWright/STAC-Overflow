@@ -1,0 +1,51 @@
+batchSize: 4 ## Input batch size
+workers: 4 ## Number of data loading workers
+nepoch: 1000 ## Number of epochs
+outf: "best_model/" ## Output folder
+logfile: "logfile.txt" ## Logfile name
+manualSeed: 4963 ## Manually set random seed.  If 0, random number will be chosen from 1 -> 10000
+save_freq: 10 ## Epoch frequency with which to save model
+torch_deterministic: True ## If true, will force torch to use deterministic algorithms for reproducibility
+
+### Dataset
+dataset: "~/Documents/drivendata/stac-overflow/data/processed/five_sets/" ## Dataset path
+split_name: "~/Documents/drivendata/stac-overflow/data/processed/five_sets/"
+dataset_type: "FloodDataset"
+augmentation: True
+balance_dataset_option: True
+balance_dataset_type: "ImbalancedDatasetSampler"
+
+### Optimizer
+optimizer: adam ## Optimizer to use.  Right now only sgd/adam are implemented
+lr: 0.00003 ## Learning rate
+beta1: 0.9
+beta2: 0.999
+five_sets_value: "1"
+
+### Learning rate scheduler
+gamma: 0.5
+patience: 10
+stop_patience_fraction: 4
+dropout_val: 0.5
+
+
+### Loss function
+xentropy: 0.3
+
+weights: "division"
+segmentation_weights_heuristic: 1.4 #1.0 # 1.4
+water_perc: 0.18 # approximate; check testing_data_balancing.ipynb
+water_perc_by_batch: False
+
+### Feature transform
+# feature_transform: True ## Use feature transform
+# ft_regularization: 0.001
+
+### Augmentations
+crop_size_square: 512
+albumnttns_value: 15 # currently 0 < x <= 15; as 0000 < x <= 1111
+
+### Model
+model: "PretrainedUNet_dropout"
+PretrainedUNet_backbone: "resnet101"
+PretrainedUNet_weights: "imagenet"

@@ -3,6 +3,17 @@ stac-overflow
 
 Repository for training a Floodwater detection model. See the competition details (https://www.drivendata.org/competitions/81/detect-flood-water/) for more information.
 
+The final model submitted consisted of training the same model (described below) twice with two random seeds and combining their predictions.
+
+This resulted in a final:
+
+* Public Score:  `0.8831`
+* Private Score: `0.7601`
+* Final Position: **13**/664
+
+The model trained with `src/models/best_model.yml` received `0.8801` on the public scoreboard (`0.7569` on the private scoreboard).
+
+
 ---
 
 # Contents
@@ -79,12 +90,6 @@ Activate the **Anaconda** environment via:
 conda activate stac-overflow
 ```
 
-or the virtual environment:
-
-```bash
-source activate stac-overflow
-```
-
 ### Installing all project dependencies
 
 To make sure that the one is able to properly interact with the repository,
@@ -121,74 +126,6 @@ For more information about this, we refer the user to
 [pre-commit's website](https://pre-commit.com/) or this
 [guide](https://ljvmiranda921.github.io/notebook/2018/06/21/precommits-using-black-and-flake8/)
 about how to use `pre-commit` in a data science workflow.
-
-### Before committing a piece of code
-
-Before a user is able to commit and push any changes made to the repository,
-these changes have to first be run through `pre-commit` and **pass all checks**.
-
-To check that all of the changes are in agreement to the team's
-coding rules and guidelines, one can run a **manual check** by executing
-the following command:
-
-```bash
-# Running manual lint check
-make lint
-```
-
-This will provide a screen that will inform the user of any issues with the
-code, and it will also **reformat** the code according to the
-project's rules.
-
-Example of the output after having run the `make lint1 command:
-
-```bash
-pre-commit run -a --hook-stage manual
-Trim Trailing Whitespace.................................................Passed
-Fix End of Files.........................................................Passed
-Check Yaml...............................................................Passed
-Check JSON...........................................(no files to check)Skipped
-Check for added large files..............................................Passed
-Check for case conflicts.................................................Passed
-Check for merge conflicts................................................Passed
-Debug Statements (Python)................................................Passed
-Fix requirements.txt.....................................................Passed
-Flake8...................................................................Passed
-black....................................................................Passed
-isort....................................................................Passed
-seed isort known_third_party.............................................Passed
-```
-
-**NOTE**: Only until all checks have passed, the user is able to commit and push
-the code to a designated branch!
-
-## Adding changes to the repository
-
-The `main` branch will always be the **clean** and **working** version
-of the repository. Any changes to the `main` branch have to go under
-code-review via a *Pull Request* (PR).
-
-When making changes to the repository, the user must:
-
-1. Create a new branch
-   ```bash
-   git checkout -b <name-of-branch>
-   ```
-
-2. Make all the changes necessary to the code.
-3. Test all of your changes.
-4. Make sure that they are in agreement to the team's coding standards by
-   running the following command:
-   ```bash
-   make lint
-   ```
-   This will reformat the code and point out any issues with the script.
-5. Once all tests have passed, the user is able to commit the changes and
-   push them to the current branch.
-6. Then one can submit a Pull Request, and one of more teammembers will
-   evaluate the changes. If all changes are approved, the changes will be
-   incorporated into the `main` branch and the branch will be deleted.
-
 
 Project Organization
 ------------
