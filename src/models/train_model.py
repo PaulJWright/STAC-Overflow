@@ -174,7 +174,7 @@ if EXPERIMENT == 1:
         opt = yaml.load(file, Loader=yaml.FullLoader)
 else:
     # --- Load parameters for training
-    with open("best_model_9th.yml") as file:
+    with open("best_model.yml") as file:
         opt = yaml.load(file, Loader=yaml.FullLoader)
 
 print(opt)
@@ -294,7 +294,7 @@ if EXPERIMENT == 1:
     pass
 else:
     shutil.copyfile(
-        "training_parameters.yml",
+        "best_model.yml",
         os.path.join(opt["outf"], "training_parameters.yml"),
     )
 

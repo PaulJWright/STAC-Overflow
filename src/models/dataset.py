@@ -3,8 +3,6 @@ import pandas as pd
 import rasterio
 import torch
 
-new = 1
-
 
 def normalize(array, min_val=None, max_val=None):
 
