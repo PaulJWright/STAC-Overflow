@@ -1,0 +1,158 @@
+workers: 4 ## Number of data loading workers
+nepoch: 1000 ## Number of epochs
+outf: "/media/paul/data/stac-overflow_experiments/experiment_4/" ## Output folder
+logfile: "logfile.txt" ## Logfile name
+manualSeed: 0 ## Manually set random seed.  If 0, random number will be chosen from 1 -> 10000
+torch_deterministic: True ## If true, will force torch to use deterministic algorithms for reproducibility
+
+batchSize:
+ - 4
+ - 8
+
+### Dataset
+dataset: "~/Documents/drivendata/stac-overflow/data/processed/five_sets/" ## Dataset path
+split_name: "~/Documents/drivendata/stac-overflow/data/processed/five_sets/"
+dataset_type: "FloodDataset"
+augmentation:
+    - True
+    - False
+balance_dataset_option:
+  - True
+  - False
+balance_dataset_type: "ImbalancedDatasetSampler"
+
+optimizer:
+    - adam
+    - sgd # new in version 3 -- corect the train_model.py for this
+
+lr: #version 4 is between these numbers
+  - 0.00009
+  - 0.00008
+  - 0.00007
+  - 0.00006
+  - 0.00005
+  - 0.00004
+  - 0.00003
+  - 0.00002
+  - 0.00001
+  - 0.0009
+  - 0.0008
+  - 0.0007
+  - 0.0006
+  - 0.0005
+  - 0.0004
+  - 0.0003
+  - 0.0002
+  - 0.0001
+  - 0.009
+  - 0.008
+  - 0.007
+  - 0.006
+  - 0.005
+  - 0.004
+  - 0.003
+  - 0.002
+  - 0.001
+  - 0.09
+  - 0.08
+  - 0.07
+  - 0.06
+  - 0.05
+  - 0.04
+  - 0.03
+  - 0.02
+  - 0.01
+
+beta1: 0.9
+beta2: 0.999
+
+sgd_momentum: 0.9 # in 4, one value
+  #- 0.9
+  #- 0.5
+  #- 0.3
+
+sgd_lr:
+  # - 0.0001
+  # - 0.0003
+  - 0.0005
+  - 0.001
+  - 0.003
+  - 0.005
+  - 0.01
+
+five_sets_value:
+  - "0"
+  - "1"
+  - "2"
+  - "3"
+  - "4"
+
+gamma: #now between these values
+  - 0.1
+  - 0.7
+
+patience:
+  - 2
+  - 4
+  - 8
+  - 10
+
+stop_patience_fraction:
+  - 2
+  - 4
+
+dropout_val: # changed values in version 3 -- corect the train_model.py for this
+  - 0.1
+  - 0.3
+  - 0.4
+  - 0.5
+  - 0.6
+  - 0.8
+
+xentropy:
+  - 0.0
+  - 1.0
+
+weights:
+  - "division"
+  - "mask"
+  - "mask_unet"
+  - "none"
+
+weights_sigma:
+  - 10
+  - 15
+  - 20
+
+segmentation_weights_heuristic:
+  - 1.4
+  - 1.5
+  - 1.6
+
+water_perc: 0.18
+
+edge_val:
+  - 3
+  - 3.5
+  - 4
+  - 4.5
+  - 5
+
+crop_size_square: 512 # should maybe change in in version 3
+  #- 256
+  #- 512
+
+albumnttns_value: 15
+
+model: "PretrainedUNet_dropout" # in 4, model reduced to UNet
+ # - "PretrainedUNet_dropout"
+ # - "UNetPP"
+ # - "FPN"
+
+PretrainedUNet_backbone: # reduced in version 3 -- correct in train_model.py
+  - "resnet34"
+  - "resnet50"
+  - "resnet101"
+  - "resnet152"
+
+PretrainedUNet_weights: "imagenet"

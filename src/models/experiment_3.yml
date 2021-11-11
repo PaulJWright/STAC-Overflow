@@ -1,0 +1,119 @@
+workers: 4 ## Number of data loading workers
+nepoch: 1000 ## Number of epochs
+outf: "/media/paul/data/stac-overflow_experiments/experiment_3/" ## Output folder
+logfile: "logfile.txt" ## Logfile name
+manualSeed: 0 ## Manually set random seed.  If 0, random number will be chosen from 1 -> 10000
+torch_deterministic: True ## If true, will force torch to use deterministic algorithms for reproducibility
+
+batchSize:
+ - 4
+ - 8
+ - 16
+
+### Dataset
+dataset: "~/Documents/drivendata/stac-overflow/data/processed/five_sets/" ## Dataset path
+split_name: "~/Documents/drivendata/stac-overflow/data/processed/five_sets/"
+dataset_type: "FloodDataset"
+augmentation:
+    - True
+    - False
+balance_dataset_option:
+  - True
+  - False
+balance_dataset_type: "ImbalancedDatasetSampler"
+
+optimizer:
+    - adam
+    - sgd # new in version 3 -- corect the train_model.py for this
+
+lr:
+  - 0.000001
+  - 0.000003
+  - 0.000005
+  - 0.00001
+  - 0.00003
+  - 0.00005
+  - 0.0001
+  - 0.0003
+  - 0.0005
+
+beta1: 0.9
+beta2: 0.999
+
+sgd_momentum: # an array in version 3 -- corect the train_model.py for this
+  - 0.9
+  - 0.5
+  - 0.3
+
+sgd_lr:
+  # - 0.0001
+  # - 0.0003
+  - 0.0005
+  - 0.001
+  - 0.003
+  - 0.005
+  - 0.01
+
+five_sets_value: "1"
+
+gamma:
+  - 0.1
+  - 0.3
+  - 0.5
+  - 0.7
+
+patience:
+  - 4
+  - 8
+  - 10
+  - 15
+
+stop_patience_fraction:
+  - 2
+  - 4
+
+dropout_val: # changed values in version 3 -- corect the train_model.py for this
+  - 0.1
+  - 0.3
+  - 0.4
+  - 0.5
+  - 0.6
+  - 0.8
+
+xentropy:
+  - 0.1
+  - 0.2
+  - 0.3
+  - 0.5
+  - 0.7
+  - 0.8
+  - 0.9
+
+weights:
+  - True
+  - False
+
+segmentation_weights_heuristic:
+  - 1.0
+  - 1.4
+
+water_perc: 0.18
+
+crop_size_square: 512 # should maybe change in in version 3
+  #- 256
+  #- 512
+
+albumnttns_value: 15
+
+model: # an array in version 3 -- corect the train_model.py for this
+  - "PretrainedUNet_dropout"
+  - "UNetPP"
+  - "FPN"
+
+PretrainedUNet_backbone: # reduced in version 3 -- correct in train_model.py
+  - "resnet34"
+  - "resnet50"
+  - "resnet101"
+  - "resnet152"
+
+PretrainedUNet_weights: "imagenet"

@@ -1,0 +1,100 @@
+workers: 4 ## Number of data loading workers
+nepoch: 1000 ## Number of epochs
+outf: "/media/paul/data/stac-overflow_experiments/experiment_2/" ## Output folder
+logfile: "logfile.txt" ## Logfile name
+manualSeed: 0 ## Manually set random seed.  If 0, random number will be chosen from 1 -> 10000
+torch_deterministic: True ## If true, will force torch to use deterministic algorithms for reproducibility
+
+batchSize:
+ - 4
+ - 8
+ - 16
+
+### Dataset
+dataset: "~/Documents/drivendata/stac-overflow/data/processed/five_sets/" ## Dataset path
+split_name: "~/Documents/drivendata/stac-overflow/data/processed/five_sets/"
+dataset_type: "FloodDataset"
+augmentation:
+    - True
+    - False
+balance_dataset_option:
+  - True
+  - False
+balance_dataset_type: "ImbalancedDatasetSampler"
+  # - "WeightedRandomSampler"
+
+optimizer: adam
+
+lr:
+  - 0.000001
+  - 0.000003
+  - 0.000005
+  - 0.00001
+  - 0.00003
+  - 0.00005
+  - 0.0001
+  - 0.0003
+  - 0.0005
+
+beta1: 0.9
+beta2: 0.999
+sgd_momentum: 0.9
+five_sets_value: "1"
+
+gamma:
+  - 0.1
+  - 0.3
+  - 0.5
+  - 0.7
+
+patience:
+  - 4
+  - 8
+  - 10
+  - 15
+
+stop_patience_fraction:
+  - 2
+  - 4
+
+dropout_val:
+  - 0.0
+  - 0.1
+  - 0.3
+  - 0.5
+  - 0.8
+
+xentropy:
+  - 0.1
+  - 0.3
+  - 0.5
+  - 0.8
+  - 0.9
+
+weights:
+  - True
+  - False
+
+segmentation_weights_heuristic:
+  - 1.0
+  - 1.4
+
+water_perc: 0.18
+
+crop_size_square:
+  - 256
+  - 512
+
+albumnttns_value: 15
+
+model: "PretrainedUNet_dropout"
+  # - "UNetPP"
+
+PretrainedUNet_backbone:
+  - "resnet18"
+  - "resnet34"
+  - "resnet50"
+  - "resnet101"
+  - "resnet152"
+
+PretrainedUNet_weights: "imagenet"

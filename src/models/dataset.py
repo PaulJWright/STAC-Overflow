@@ -97,6 +97,7 @@ class FloodDataset(torch.utils.data.Dataset):
     def __init__(
         self,
         root,
+        fsv=None,
         split="train",
         data_augmentation=True,
         split_name="",
@@ -115,10 +116,11 @@ class FloodDataset(torch.utils.data.Dataset):
         self.fns = []
         if self.split == "train":
             data = pd.read_csv(
-                f"{self.split_name}chipId_0_train.csv"  # weighted_withoutna.csv"
+                f"{self.split_name}chipId_{fsv}_train.csv"  # _weighted_withoutna.csv"
+                # f"{self.split_name}chipId_0_train.csv"  # weighted_withoutna.csv"
             )
         elif self.split == "val":
-            data = pd.read_csv(f"{self.split_name}chipId_1_val.csv")
+            data = pd.read_csv(f"{self.split_name}chipId_{fsv}_val.csv")
         else:
             print("Not a valid split type")
 
@@ -177,206 +179,93 @@ class FloodDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         # Loads a 2-channel image from a chip-level dataframe
 
-        if new == 2:
-            img = self.data_x.loc[idx]
+        img = self.data_x.loc[idx]
 
-            with rasterio.open(img.vv_path) as vv:
-                vv_path = vv.read(1)
-                # vv_path = np.clip(vv_path, np.nanmin(vv_path), np.nanmax(vv_path))
-                # vv_path = normalize(vv_path, -77, 26)
+        with rasterio.open(img.vv_path) as vv:
+            vv_path = vv.read(1)
+        with rasterio.open(img.vh_path) as vh:
+            vh_path = vh.read(1)
+        # x_arr = np.stack([vv_path, vh_path], axis=-1)
+        with rasterio.open(img.nasadem_path) as nasadem:
+            nasadem_path = nasadem.read(1)
+        with rasterio.open(img.occurrence_path) as occurrence:
+            occurrence_path = occurrence.read(1)
+        with rasterio.open(img.seasonality_path) as seasonality:
+            seasonality_path = seasonality.read(1)
+        with rasterio.open(img.extent_path) as extent:
+            extent_path = extent.read(1)
+        with rasterio.open(img.change_path) as change:
+            change_path = change.read(1)
+        with rasterio.open(img.recurrence_path) as recurrence:
+            recurrence_path = recurrence.read(1)
+        with rasterio.open(img.transitions_path) as transitions:
+            transitions_path = transitions.read(1)
+        x_arr = np.stack(
+            [
+                vv_path,
+                vh_path,
+                occurrence_path,
+                nasadem_path,
+                seasonality_path,
+                extent_path,
+                change_path,
+                recurrence_path,
+                transitions_path,
+            ],
+            axis=-1,
+        )
 
-            with rasterio.open(img.vh_path) as vh:
-                vh_path = vh.read(1)
-                # vh_path = np.clip(vh_path, np.nanmin(vh_path), np.nanmax(vh_path))
-                # vh_path = normalize(vh_path, -77, 26)
-
-            with rasterio.open(img.occurrence_path) as occurrence:
-                occurrence_img = normalize(occurrence.read(1)).astype(
-                    np.float32
-                )
-
-            with rasterio.open(img.seasonality_path) as seasonality:
-                seasonality_img = normalize(seasonality.read(1)).astype(
-                    np.float32
-                )
-
-            with rasterio.open(img.extent_path) as extent:
-                extent_img = normalize(extent.read(1)).astype(np.float32)
-
-            with rasterio.open(img.nasadem_path) as dem:
-                dem_img = (normalize(dem.read(1)) < 0.5).astype(np.float32)
-
-            o_s_e_combined = (
-                (
-                    0.25 * occurrence_img
-                    + 0.25 * seasonality_img
-                    + 0.5 * extent_img
-                )
-                > 0.5
-            ).astype(np.float32)
-
-            x_arr = np.stack(
-                [
-                    vv_path,
-                    vh_path,
-                    o_s_e_combined,
-                    dem_img,
-                ],
-                axis=-1,
-            )
-
-        elif new == 1:
-            img = self.data_x.loc[idx]
-
-            with rasterio.open(img.vv_path) as vv:
-                vv_path = vv.read(1)
-            with rasterio.open(img.vh_path) as vh:
-                vh_path = vh.read(1)
-            # x_arr = np.stack([vv_path, vh_path], axis=-1)
-            with rasterio.open(img.nasadem_path) as nasadem:
-                nasadem_path = nasadem.read(1)
-            with rasterio.open(img.occurrence_path) as occurrence:
-                occurrence_path = occurrence.read(1)
-            with rasterio.open(img.seasonality_path) as seasonality:
-                seasonality_path = seasonality.read(1)
-            with rasterio.open(img.extent_path) as extent:
-                extent_path = extent.read(1)
-            with rasterio.open(img.change_path) as change:
-                change_path = change.read(1)
-            with rasterio.open(img.recurrence_path) as recurrence:
-                recurrence_path = recurrence.read(1)
-            with rasterio.open(img.transitions_path) as transitions:
-                transitions_path = transitions.read(1)
-            x_arr = np.stack(
-                [
-                    vv_path,
-                    vh_path,
-                    occurrence_path,
-                    nasadem_path,
-                    seasonality_path,
-                    extent_path,
-                    change_path,
-                    recurrence_path,
-                    transitions_path,
-                ],
-                axis=-1,
-            )
-
-            # Min-max normalization
-            # !TODO understand if min/max_norm here is suitable.
-            # !TODO missing values should go to zero (as easier to predict)
-            mean_norm = -10.8662
-            stdv_norm = 5.1265
-            x_arr[:, :, 0:1] = (x_arr[:, :, 0:1] - mean_norm) / (stdv_norm)
-            mean_norm = -17.6854
-            stdv_norm = 5.7039
-            x_arr[:, :, 1:2] = (x_arr[:, :, 1:2] - mean_norm) / (stdv_norm)
-            #
-            # --- occurence
-            x_arr[:, :, 2:3] = x_arr[:, :, 2:3] / 255
-            #
-            # --- nasadem
-            # just dividing because this data is useful
-            # assuming no flooding > 200m above sealevel
-            x_arr[:, :, 3:4] = x_arr[:, :, 3:4] / 750.0
-            x_arr[:, :, 3:4] = np.clip(x_arr[:, :, 3:4], -1, 1)
-            mean_norm = 0.1977
-            stdv_norm = 0.1635
-            x_arr[:, :, 3:4] = (x_arr[:, :, 3:4] - mean_norm) / (stdv_norm)
-            #
-            # --- seasonality
-            x_arr[:, :, 4:5][x_arr[:, :, 4:5] == 255] = 0
-            mean_norm = 0.6490
-            stdv_norm = 2.5721
-            x_arr[:, :, 4:5] = (x_arr[:, :, 4:5] - mean_norm) / (stdv_norm)
-            #
-            # --- extent
-            x_arr[:, :, 5:6][x_arr[:, :, 5:6] == 255] = 0
-            mean_norm = 0.1194
-            stdv_norm = 0.3243
-            x_arr[:, :, 5:6] = (x_arr[:, :, 5:6] - mean_norm) / (stdv_norm)
-            #
-            # --- change
-            # x_arr[:,:,6:7][x_arr[:,:,6:7] == 255] = 0
-            # mean_norm = 233.1316
-            # stdv_norm = 55.7812
-            x_arr[:, :, 6:7] = x_arr[:, :, 6:7] / 255
-            #
-            # --- recurrence
-            x_arr[:, :, 7:8][x_arr[:, :, 7:8] == 255] = 0
-            mean_norm = 9.2239
-            stdv_norm = 26.7654
-            x_arr[:, :, 7:8] = (x_arr[:, :, 7:8] - mean_norm) / (stdv_norm)
-            #
-            # --- transitions\
-            x_arr[:, :, 8:9][x_arr[:, :, 8:9] == 255] = 0
-            mean_norm = 0.5780
-            stdv_norm = 1.9358
-            x_arr[:, :, 8:9] = (x_arr[:, :, 8:9] - mean_norm) / (stdv_norm)
-        else:
-            # Min-max normalization
-            # !TODO understand if min/max_norm here is suitable.
-            # !TODO missing values should go to zero (as easier to predict)
-            min_norm = -77
-            max_norm = 26
-            x_arr[:, :, 0:2] = np.clip(x_arr[:, :, 0:2], min_norm, max_norm)
-            x_arr[:, :, 0:2] = (x_arr[:, :, 0:2] - min_norm) / (
-                max_norm - min_norm
-            )
-            #
-            # --- occurence
-            min_norm = 0
-            max_norm = 100
-            x_arr[:, :, 2:3] = np.clip(x_arr[:, :, 2:3], min_norm, max_norm)
-            x_arr[:, :, 2:3] = (x_arr[:, :, 2:3] - min_norm) / (
-                max_norm - min_norm
-            )
-            # x_arr[:,:,2:3] += 1.
-            #
-            # --- nasadem
-            # just dividing because this data is useful
-            # assuming no flooding > 200m above sealevel
-            x_arr[:, :, 3:4] = x_arr[:, :, 3:4] / 300.0
-            x_arr[:, :, 3:4] = np.clip(x_arr[:, :, 3:4], 0, 1)
-            #
-            # --- seasonality
-            min_norm = 0
-            max_norm = 12
-            x_arr[:, :, 4:5] = np.clip(x_arr[:, :, 4:5], min_norm, max_norm)
-            x_arr[:, :, 4:5] = (x_arr[:, :, 4:5] - min_norm) / (
-                max_norm - min_norm
-            )
-            # x_arr[:,:,4:5] = x_arr[:,:,4:5]/12.
-            # x_arr[:,:,4:5] *= -1.
-            # x_arr[:,:,4:5] += 1.
-            # --- extent
-            min_norm = 0
-            max_norm = 1
-            x_arr[:, :, 5:6] = np.clip(x_arr[:, :, 5:6], min_norm, max_norm)
-            x_arr[:, :, 5:6] = (x_arr[:, :, 5:6] - min_norm) / (
-                max_norm - min_norm
-            )
-            # --- change
-            min_norm = 0
-            max_norm = 255
-            x_arr[:, :, 6:7] = np.clip(x_arr[:, :, 6:7], min_norm, max_norm)
-            x_arr[:, :, 6:7] = (x_arr[:, :, 6:7] - min_norm) / (
-                max_norm - min_norm
-            )
-            # --- recurrence
-            min_norm = 0
-            max_norm = 100
-            x_arr[:, :, 7:8] = np.clip(x_arr[:, :, 7:8], min_norm, max_norm)
-            x_arr[:, :, 7:8] = (x_arr[:, :, 7:8] - min_norm) / (
-                max_norm - min_norm
-            )
-            # --- transitions
-            min_norm = 0
-            max_norm = 10
-            x_arr[:, :, 8:9] = np.clip(x_arr[:, :, 8:9], min_norm, max_norm)
-            x_arr[:, :, 8:9] = (x_arr[:, :, 8:9] - min_norm) / (
-                max_norm - min_norm
-            )
+        # Min-max normalization
+        # !TODO understand if min/max_norm here is suitable.
+        # !TODO missing values should go to zero (as easier to predict)
+        mean_norm = -10.8662
+        stdv_norm = 5.1265
+        x_arr[:, :, 0:1] = (x_arr[:, :, 0:1] - mean_norm) / (stdv_norm)
+        mean_norm = -17.6854
+        stdv_norm = 5.7039
+        x_arr[:, :, 1:2] = (x_arr[:, :, 1:2] - mean_norm) / (stdv_norm)
+        #
+        # --- occurence
+        x_arr[:, :, 2:3] = x_arr[:, :, 2:3] / 255
+        #
+        # --- nasadem
+        # just dividing because this data is useful
+        # assuming no flooding > 200m above sealevel
+        x_arr[:, :, 3:4] = x_arr[:, :, 3:4] / 750.0
+        x_arr[:, :, 3:4] = np.clip(x_arr[:, :, 3:4], -1, 1)
+        mean_norm = 0.1977
+        stdv_norm = 0.1635
+        x_arr[:, :, 3:4] = (x_arr[:, :, 3:4] - mean_norm) / (stdv_norm)
+        #
+        # --- seasonality
+        x_arr[:, :, 4:5][x_arr[:, :, 4:5] == 255] = 0
+        mean_norm = 0.6490
+        stdv_norm = 2.5721
+        x_arr[:, :, 4:5] = (x_arr[:, :, 4:5] - mean_norm) / (stdv_norm)
+        #
+        # --- extent
+        x_arr[:, :, 5:6][x_arr[:, :, 5:6] == 255] = 0
+        mean_norm = 0.1194
+        stdv_norm = 0.3243
+        x_arr[:, :, 5:6] = (x_arr[:, :, 5:6] - mean_norm) / (stdv_norm)
+        #
+        # --- change
+        # x_arr[:,:,6:7][x_arr[:,:,6:7] == 255] = 0
+        # mean_norm = 233.1316
+        # stdv_norm = 55.7812
+        x_arr[:, :, 6:7] = x_arr[:, :, 6:7] / 255
+        #
+        # --- recurrence
+        x_arr[:, :, 7:8][x_arr[:, :, 7:8] == 255] = 0
+        mean_norm = 9.2239
+        stdv_norm = 26.7654
+        x_arr[:, :, 7:8] = (x_arr[:, :, 7:8] - mean_norm) / (stdv_norm)
+        #
+        # --- transitions\
+        x_arr[:, :, 8:9][x_arr[:, :, 8:9] == 255] = 0
+        mean_norm = 0.5780
+        stdv_norm = 1.9358
+        x_arr[:, :, 8:9] = (x_arr[:, :, 8:9] - mean_norm) / (stdv_norm)
 
         if self.data_y is not None:
             label_path = self.data_y.loc[idx].label_path
