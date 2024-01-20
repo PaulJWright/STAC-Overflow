@@ -9,7 +9,7 @@ click==8.0.1
 coverage==5.5
 flake8>=3.9.0, <4.0
 git+https://github.com/ufoym/imbalanced-dataset-sampler.git # torchsampler-0.1.1
-ipython==7.27.0
+ipython==8.10.0
 jupyter_client>=5.1, <7.0
 jupyterlab==3.6.7
 jupyter~=1.0
